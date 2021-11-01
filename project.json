@@ -1,0 +1,28 @@
+{
+  "assets": [],
+  "useFeatures": [],
+  "icon": "res/icon.png",
+  "launchConfig": {
+    "displaySplash": false,
+    "hideLogs": false,
+    "splashIcon": "res/splashIcon.png",
+    "splashText": "Powered by X",
+    "stableMode": false
+  },
+  "main": "main.js",
+  "name": "微信工具人",
+  "optimization": {
+    "removeAccessibilityService": false,
+    "removeOpenCv": false,
+    "unusedResources": false
+  },
+  "packageName": "com.nb.weixin.X",
+  "permissionConfig": {
+    "requestListOnStartup": [
+      "android.permission.WRITE_EXTERNAL_STORAGE"
+    ]
+  },
+  "scripts": {},
+  "versionCode": 1,
+  "versionName": "Beta 0.0.1"
+}

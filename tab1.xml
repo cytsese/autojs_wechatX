@@ -1,0 +1,43 @@
+<vertical gravity="center" id="tab1Content">
+    <card w="*" h="40" margin="32 8" cardCornerRadius="8dp" cardElevation="3dp">
+        <text id="start" text="开始运行" gravity="center" textSize="18sp" />
+    </card>
+    <card w="*" h="auto" margin="16 4" cardCornerRadius="8dp" cardElevation="1dp" gravity="center_vertical">
+    <vertical id="config" gravity="center" padding="8 8 8 0" h="auto">
+        <text h="42" gravity="center" text="群聊名称设置"/>
+        <horizontal gravity='center'>
+            <text text="Team1" />
+            <input margin="4 4" w='160' id="team1"/>
+        </horizontal>
+        <horizontal gravity='center'>
+            <text text="Team2"  />
+            <input margin="4 4" w='160' id="team2"/>
+        </horizontal>
+    </vertical>
+</card>
+     <card w="*" h="auto" margin="16 6" cardCornerRadius="8dp" cardElevation="1dp" gravity="center_vertical">
+        <vertical id="config" gravity="center" padding="8 8 8 0" h="auto">
+            <text text="信息1"  />
+            <input margin="4 4" id="msg1"/>
+            <text text="信息2"  />
+            <input margin="4 4" id="msg2"/>
+            <text text="信息3"  />
+            <input margin="4 4" id="msg3"/>
+            <horizontal gravity='center'>
+                <text textSize="12sp" text="最小金额"  />
+                <input  w='40' margin="1 1" id="min_money"/>
+                <text textSize="12sp" text="超时时间(s)"  />
+                <input w='40' margin="1 1" id="no_money_wait_time"/>
+                <text textSize="12sp" text="等待时间(s)"  />
+                <input w='40' margin="1 1" id="money_wait_time"/>
+            </horizontal>
+        </vertical>
+    </card>
+    <card w="*" h="auto" margin="16 6" cardCornerRadius="8dp"
+    cardElevation="1dp" gravity="center_vertical">
+        <vertical padding="4 8" h="auto">
+            <text text="软件说明: "  />
+            <text margin="4 4" id="软件说明"  />
+        </vertical>
+    </card>
+</vertical>
