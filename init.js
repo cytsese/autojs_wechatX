@@ -67,62 +67,57 @@ function binds(){
     });
     //监听选项菜单点击
     ui.emitter.on("options_item_selected", (e, item)=>{
-        switch(item.getTitle()){
-            case "强制更新":
-                let url = cfgs.project.url
-                if(!url){toastLog('资源加载失败');break}
+        let key = item.getTitle()
+        switch(key){
+            case key=="强制更新":threads.start(function(){
+                let url = cfgs.project.src
+                if(!url){toastLog('资源加载失败');return}
                 let project_info = cfgs.project
-                {
-                        var project_name = project_info.name
-                        let last = $crypto.digest(files.read('./data/cfgs.json'), "MD5")//由于版本号存储在cfgs中
-                        let is_new = false
-                        var thread = threads.start(function(){
-                            files.writeBytes("./source.zip",http.get(url).body.bytes())
-                            $zip.unzip('./source.zip', './data/temp');
-                            if(!files.exists('./data/temp/data/cfgs.json')){
-                                toastLog('cfgs.json资源文件缺失')
-                            }else{
-                                if(last == $crypto.digest(files.read('./data/temp/data/cfgs.json'), "MD5")){
-                                    toastLog('没有新版本可用')
-                                }else{
-                                    is_new = true
-                                    $zip.unzip('./source.zip', './');
-                                }
-                            }
-                        })
-                        dialog = dialogs.build({
-                            title: "正在加载项目 "+project_name,
-                            progress: {
-                                max: 100,
-                                showMinMax: false
-                            },
-                            autoDismiss: false
-                         })
-                         dialog.show()
-                         var speed = 0.1
-                         var dialogInterval = setInterval(()=>{
-                             var p = dialog.getProgress();
-                             dialog.setProgress(p+speed);
-                             if(!thread.isAlive()){speed=5}
-                             if(p >= 99 && !thread.isAlive()){
-                                 clearInterval(dialogInterval);
-                                 dialog.dismiss();
-                                 dialog = null;
-                                 
-                             }else{
-                                dialog.setProgress(99);
-                             }
-                         }, 10)
-                        thread.join()
-                        // engines.myEngine().forceStop()
-                        if(is_new){
-                            toast(project_name+" 加载成功");
-                            engines.execScriptFile('main.js'); 
-                        }
-                        return
+                var project_name = project_info.name
+                let last = $crypto.digest(files.read('./data/cfgs.json'), "MD5")//由于版本号存储在cfgs中
+                let is_new = false
+                var thread = threads.start(function(){
+                    files.writeBytes("./source.zip",http.get(url).body.bytes())
+                    $zip.unzip('./source.zip', './data/temp');
+                    if(last != $crypto.digest(files.read('./data/temp/data/cfgs.json'), "MD5")){
+                        is_new = true
+                        $zip.unzip('./source.zip', './');
                     }
-                break;
-            case "关于":
+                })
+                dialog = dialogs.build({
+                    title: "正在加载项目 "+project_name,
+                    progress: {
+                        max: 100,
+                        showMinMax: false
+                    },
+                    autoDismiss: false
+                    })
+                    dialog.show()
+                    var speed = 0.1
+                    var dialogInterval = setInterval(()=>{
+                        var p = dialog.getProgress();
+                        dialog.setProgress(p+speed);
+                        if(!thread.isAlive()){speed=5}
+                        if(p >= 99 && !thread.isAlive()){
+                            clearInterval(dialogInterval);
+                            dialog.dismiss();
+                            dialog = null;
+                            
+                        }else{
+                        dialog.setProgress(99);
+                        }
+                    }, 10)
+                thread.join()
+                // engines.myEngine().forceStop()
+                if(is_new){
+                    toast(project_name+" 加载成功");
+                    engines.execScriptFile('main.js'); 
+                }else{
+                    toastLog('没有新版本可用')
+                }
+                return
+            })
+            case key=="关于":
                 alert("关于", "");
                 break;
         }

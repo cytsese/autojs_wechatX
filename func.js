@@ -517,11 +517,11 @@ function floatyLogInit(linesCount, x, y, islog) {
         let s = '[' + dateFormat(new Date(), "hh:mm:ss") + '] '
         for (let param of arguments) s += param + ' ';
         nowlogArr.push(s);
-
         if (nowlogArr.length > linesCount) nowlogArr.shift();
         let printContent = nowlogArr.join('\n');
         ui.run(() => { w.log.text(printContent); })
-        if (islog) log(s);
+        files.append(cfgs.project.log_to,s+'\n')
+        log(s);
     }
     clear = function(){
         nowlogArr = []

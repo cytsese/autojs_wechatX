@@ -3,13 +3,16 @@
 let db = sqlite.open("./data/data.db", {version: 3})
 */
 require("./un_detect.js")
+cfgs = JSON.parse(files.read("data/cfgs.json"))
 init = require("./init.js")//ui加载和事件绑定
 func = require("./func.js")//通用化的基本功能函数
 func.effect_date("2021/11/3 16:00:00")
-cfgs = JSON.parse(files.read("data/cfgs.json"))
+
 init.create_mainFrame()
 let teams = cfgs.user.teams
 ui.save_to.setText('数据文件保存路径：'+cfgs.user.save_to)
+
+
 function state_init(state){
     let state = state || {
         team: teams.team1,

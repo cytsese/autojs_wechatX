@@ -1,1 +1,1 @@
-E:\Program\第三方Program\7-Zip\7z.exe a ./Release/20211030微信助手X.zip ./ -x"!build"
+E:\Program\第三方Program\7-Zip\7z.exe a ./Release/20211030微信助手X.zip ./ -x"@.gitignore"

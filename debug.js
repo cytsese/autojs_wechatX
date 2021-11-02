@@ -1,6 +1,5 @@
 require("./un_detect.js")
 cfgs = JSON.parse(files.read("data/cfgs.json"))
-
 func = require("./func.js")
 func.create_floatyLog(6)
 let teams = cfgs.user.teams
@@ -95,13 +94,14 @@ function user_msg_deal(user_msg_wid){
                 sleep(5000)
             }else{
                 func.log('等待 '+cfgs.user.money_wait_time+'s 后发送信息3，并T出用户')
-                state[state.team].missions.push({
+                state[state.team].missions = [{
                     target:function(){
                         send_msg(cfgs.user.msg3)
                         open_team()
                     },
                     time:1000*cfgs.user.money_wait_time + Date.now()
-                })
+                }]
+                func.log(state[state.team].missions.toString())
             }
         }else{
             func.log('检测到用户消息')
@@ -169,8 +169,8 @@ function close_team(){
     team_card()
     text('群管理').findOne().parent().parent().parent().parent().click()
     let wid = text("群聊邀请确认").findOne().parent().parent().parent().findOne(clickable(true))
-    state[state.team].closed || wid.click()
-    state[state.team].closed = true
+    wid.click()
+    sleep(100)
     page_back()//now is team_card
     out_person(2)//关群后T人至2人
     page_back()
@@ -184,8 +184,8 @@ function open_team(){
     out_person(1)//T人至1人后开群
     text('群管理').findOne().parent().parent().parent().parent().click()
     let wid = text("群聊邀请确认").findOne().parent().parent().parent().findOne(clickable(true))
-    state[state.team].closed && wid.click()
-    state[state.team].closed = false
+    wid.click()
+    sleep(100)
     page_back()
     page_back()
     func.log('计时器已关闭，等待用户加入')
@@ -215,13 +215,19 @@ function check_misson(team_wid,teamname){
     // log('check_misson missions['+ms.length+'],no_money_mission['+m.length+']')
     for(let i in ms){
         if(ms[i].time<now){
+            log(teamname+':发送消息3，T出用户')
             chat(team_wid,teamname)
-            ms[i].target()//now is chat page
+            send_msg(cfgs.user.msg3)//now is chat page
+            open_team()
             page_back()//now is home page
+            ms[i] = {}
+        }else{
+            log(ms[i].time-now+'ms 后将T出用户')
         }
     }
+    
     if(!m.target){return}
-    func.log(m.time-now+'ms 后无有效操作，将T出用户')
+    log(m.time-now+'ms 后无有效操作，将T出用户')
     if(m.time<now){
         chat(team_wid,teamname)
         m.target()//now is chat page
@@ -297,14 +303,16 @@ function save_data(data){
     //     msg:''
     // }
     // let txt = ''
+    // let m = ''
     // for(let key in data){
-    //     txt += data[data]
+    //     m = data[key] || 'None'
+    //     txt += m + ' ---- '
     // }
-    files.append(cfgs.user.save_to, JSON.stringify(data))
+    files.append(cfgs.user.save_to, '['+func.datetime()+']' + JSON.stringify(data)+'\n')
     func.log('数据已记录')
 }
 function send_msg(msg){
-    setText(msg)
+    editable(true).depth(15).findOne().setText(msg)
     text("发送").depth(1+14).findOne().click()
 }
 function is_join(msg){
