@@ -1,24 +1,12 @@
 require("./un_detect.js")
-data = JSON.parse(files.read("data/data.json"))
+cfgs = JSON.parse(files.read("data/cfgs.json"))
+
 func = require("./func.js")
 func.create_floatyLog(6)
-
-let db = sqlite.open("./data/data.db", {version: 3})
-let cfgs = {
-    msg1:'msg1',
-    msg2:'msg2',
-    msg3:'msg3',
-    min_money:200,
-    no_money_wait_time:5,
-    money_wait_time:5
-}
-let teams = {
-    team1:'test1',
-    team2:'test2'
-}
+let teams = cfgs.user.teams
 function state_init(state){
     let state = state || {
-        team: 'test1',
+        team: teams.team1,
     }
     for(let i in teams){
         state[teams[i]] = {
@@ -31,7 +19,7 @@ function state_init(state){
                     func.log('用户超时，T出用户，开启群聊')
                     open_team()
                 },
-                time:cfgs.no_money_wait_time*1000+Date.now()
+                time:cfgs.user.no_money_wait_time*1000+Date.now()
             },
             last_deal_time:null,
             last_msg: '',
@@ -44,18 +32,11 @@ function state_init(state){
     return state
 }
 let state = state_init()
-let msg_data = {
-    user_name: '系统消息',
-    vcode: '',
-    money: '',
-    msg: '',
-    un_used: ''
-}
 
+mainloop()
 
-main()
-
-function main(){
+function mainloop(){
+    func.log('开始运行')
     /*
     chat页面完成操作后尽量不停留，所有的空余时间应当在聊天界面外的主消息界面监测
     */ 
@@ -69,22 +50,35 @@ function main(){
         sleep(500)
         newmsg = wait_newmsg()
     }
+    
 }
+
 function msg_deal(msg_wids){
     let e1 = user_msg_deal(msg_wids.user_msg_wid)
     let e2 = sys_msg_deal(msg_wids.sys_msg_wid)
     state[state.team].last_deal_time = Date.now()
+    if(state[state.team].no_money_mission.target){
+        state[state.team].no_money_mission = state[state.team].no_money_mission_copy
+    }
     if(e1 || e2){
         func.log('计时器[用户超时] 已刷新')
-        state[state.team].no_money_mission.time = cfgs.no_money_wait_time*1000+Date.now()
+        state[state.team].no_money_mission.time = cfgs.user.no_money_wait_time*1000+Date.now()
     }else{
         func.log('计时器[用户超时] 运行中')
+        // state[state.team].no_money_mission.time = cfgs.user.no_money_wait_time*1000+Date.now()
     }
     func.log('消息处理完毕，返回监控')
 }
 function user_msg_deal(user_msg_wid){
     func.log('user_msg_deal')
     let is_effect = false
+    let msg_data = {
+        team:state.team,
+        user_name:'',
+        vcode:'',
+        money:'',
+        msg:''
+    }
     for(let i in user_msg_wid){
         state[state.team].last_deal_time = Date.now()
         msg_data.user_name = user_msg_wid[i].parent().parent().child(0).child(0).text()
@@ -95,19 +89,18 @@ function user_msg_deal(user_msg_wid){
             msg_data.vcode = ''
             msg_data.money = get_money(user_msg_wid[i])
             func.log('红包已领取，金额：'+msg_data.money)
-            if(msg_data.money<cfgs.min_money){
+            if(msg_data.money<cfgs.user.min_money){
                 func.log('金额小于阈值，T出用户')
                 open_team()
                 sleep(5000)
             }else{
-                func.log('等待 '+cfgs.money_wait_time+'s 后发送信息3，并T出用户')
+                func.log('等待 '+cfgs.user.money_wait_time+'s 后发送信息3，并T出用户')
                 state[state.team].missions.push({
                     target:function(){
-                        func.log('等待时间已到，T出 '+state.team+' 用户')
-                        send_msg(cfgs.msg3)
+                        send_msg(cfgs.user.msg3)
                         open_team()
                     },
-                    time:1000*cfgs.money_wait_time + Date.now()
+                    time:1000*cfgs.user.money_wait_time + Date.now()
                 })
             }
         }else{
@@ -117,7 +110,7 @@ function user_msg_deal(user_msg_wid){
                 is_effect = true
                 msg_data.vcode = msg_data.msg
                 func.log('收到验证码，发送信息2')
-                send_msg(cfgs.msg2)
+                send_msg(cfgs.user.msg2)
             }else{
                 func.log('无效的用户消息')
                 msg_data.vcode = ''
@@ -131,6 +124,13 @@ function user_msg_deal(user_msg_wid){
 function sys_msg_deal(sys_msg_wid){
     // 对用户加群做出处理
     let is_effect = false
+    let msg_data = {
+        team:state.team,
+        user_name:'',
+        vcode:'',
+        money:'',
+        msg:''
+    }
     func.log('sys_msg_deal')
     for(let i in sys_msg_wid){
         state[state.team].last_deal_time = Date.now()
@@ -146,7 +146,7 @@ function sys_msg_deal(sys_msg_wid){
             func.log('准备关闭群聊')
             close_team()
             func.log('群聊已关闭，发送信息1')
-            send_msg(cfgs.msg1)
+            send_msg(cfgs.user.msg1)
         }
     }
     return sys_msg_wid.length
@@ -155,11 +155,11 @@ function page_back(){
     let wid = null
     if(['com.tencent.wework.msg.controller.PersonalModeGroupManagerActivity',
     'com.tencent.wework.msg.controller.PersonalModeGroupSettingActivity'].indexOf(currentActivity())+1){
-        wid = clickable(true).className("android.widget.TextView").depth(8).findOne()
+        wid = clickable(true).className("android.widget.TextView").depth(1+8).findOne()
     }else{
         // com.tencent.wework.msg.controller.ExternalGroupMessageListActivity
         // com.tencent.wework.msg.controller.PersonalModeGroupMemberActivity
-        wid = clickable(true).className("android.widget.TextView").depth(9).findOne()
+        wid = clickable(true).className("android.widget.TextView").depth(1+9).findOne()
     }
     wid.click()
     sleep(200)
@@ -176,7 +176,7 @@ function close_team(){
     page_back()
     func.log('计时器已激活，用户超时将被踢出')
     state[state.team].no_money_mission = state[state.team].no_money_mission_copy
-    state[state.team].no_money_mission.time = 1000*cfgs.no_money_wait_time + Date.now()
+    state[state.team].no_money_mission.time = 1000*cfgs.user.no_money_wait_time + Date.now()
 }
 function open_team(){
     func.log('open team')
@@ -197,9 +197,9 @@ function out_person(stay_num){
     let wid = null
     let person_num = state[state.team].person_num
     text('群成员').findOne().parent().parent().parent().parent().parent().click()//goto person page
-    longClickable(true).depth(7).findOne()//wait page load
+    longClickable(true).depth(1+7).findOne()//wait page load
     for(let i=0;i<person_num-stay_num;i++){
-        wid = longClickable(true).depth(7).find()
+        wid = longClickable(true).depth(1+7).find()
         wid[wid.length-1].longClick()
         text('移出').findOne().parent().parent().parent().click()
         sleep(100)
@@ -211,7 +211,8 @@ function check_misson(team_wid,teamname){
     let ms = state[teamname].missions
     let m = state[teamname].no_money_mission
     let now = Date.now()
-    // func.log('check_misson missions['+ms.length+'],no_money_mission['+m.length+']')
+    log(ms,m)
+    // log('check_misson missions['+ms.length+'],no_money_mission['+m.length+']')
     for(let i in ms){
         if(ms[i].time<now){
             chat(team_wid,teamname)
@@ -232,10 +233,12 @@ function wait_newmsg(){
     let temp = ''
     let team_wid = null
     let unread_wid = null
+    log(teams)
     // func.log(state[teams['team1']].unread_num);return
     while(1){
         for(let i in teams){
-            temp = depth(13).text(teams[i]).findOne(3000)
+            log(teams[i])
+            temp = depth(1+13).text(teams[i]).findOne(3000)
             if(!temp){
                 func.log('找不到目标群'+teams[i]+'，请检查群聊名称设置')
                 return
@@ -259,9 +262,14 @@ function wait_newmsg(){
             if(Number(unread_wid.text())){
                 state[teams[i]].unread_num = unread_wid.text()
                 return {team_wid: team_wid, teamname: teams[i], unread_num:unread_wid.text()}
+            }else{
+                if(team_wid.findOne(textContains('来自').depth(1+12))){
+                    func.log('检测到新成员加入')
+                    state[teams[i]].unread_num = 1
+                    return {team_wid: team_wid, teamname: teams[i], unread_num:1}
+                }
             }
         }
-        
         sleep(100)
     }
 }
@@ -273,25 +281,31 @@ function chat(team_wid,team_name){
 }
 function team_card(){
     //每次点击群名片顺便扫描群人数
-    className("android.widget.TextView").depth(10).clickable(true).findOne().click()
-    state[state.team].person_num = depth(12).className("android.widget.GridView").findOne().childCount()
+    sleep(100)
+    className("android.widget.TextView").depth(1+10).clickable(true).findOne().click()
+    sleep(100)
+    state[state.team].person_num = depth(1+12).className("android.widget.GridView").findOne().childCount()
     func.log('now person:'+state[state.team].person_num)
+    sleep(100)
 }
-function save_data(_data){
-    let data = {
-        user_name: _data.user_name || '系统消息',
-        vcode: _data.vcode || '',
-        money: _data.money || '',
-        msg: _data.msg || '',
-        un_used: _data.un_used || ''
-    }
-    // db.rawQuery("SELECT * FROM WXMSG WHERE name = ?", ["李四"]).single()
-    db.insert("WXMSG", data)
-    func.log('数据已记录，user['+data.user_name+']:'+data.msg)
+function save_data(data){
+    // let msg_data = {
+    //     team:state.team,
+    //     user_name:'',
+    //     vcode:'',
+    //     money:'',
+    //     msg:''
+    // }
+    // let txt = ''
+    // for(let key in data){
+    //     txt += data[data]
+    // }
+    files.append(cfgs.user.save_to, JSON.stringify(data))
+    func.log('数据已记录')
 }
 function send_msg(msg){
     setText(msg)
-    text("发送").depth(14).findOne().click()
+    text("发送").depth(1+14).findOne().click()
 }
 function is_join(msg){
     return msg.indexOf("二维码加入了") != -1
@@ -314,27 +328,50 @@ function get_money(msg_wid){
     }else{
         func.log("红包派完了")
     }
-    clickable(true).className("android.widget.TextView").depth(8).findOne().click()
+    clickable(true).className("android.widget.TextView").depth(1+8).findOne().click()
     return money
 }
 function get_msg(num){
     num = num || state[state.team].unread_num
     func.log('get_msg：'+num)
-    let msg_all = depth(9).className("android.widget.ListView").findOne().children()
+    let msg_all = depth(1+9).className("android.widget.ListView").findOne().children()
     let msgbox = msg_all.slice(msg_all.length-1-num, msg_all.length-1)
     let user_msg_wid = []
     let sys_msg_wid = []
     let wid = null
     for(let i in msgbox){
-        wid = msgbox[i].findOne(depth(18).className("android.widget.TextView"))
+        wid = msgbox[i].findOne(depth(1+18).className("android.widget.TextView"))
         wid && user_msg_wid.push(wid.parent().parent().parent().parent())
-        wid = msgbox[i].findOne(depth(15).className("android.widget.TextView"))
+        wid = msgbox[i].findOne(depth(1+15).className("android.widget.TextView"))
         wid && sys_msg_wid.push(wid.parent().parent())
-        wid = msgbox[i].findOne(text("红包").depth(16))
+        wid = msgbox[i].findOne(text("红包").depth(1+16))
         wid && user_msg_wid.push(wid.parent().parent())
     }
     func.log('已获取 '+user_msg_wid.length+' 条用户消息，'+sys_msg_wid.length+' 条系统消息')
     return {user_msg_wid:user_msg_wid,sys_msg_wid:sys_msg_wid}
+}
+
+function saveConfig(){
+    let Configs = cfgs.ui
+    for(let key in Configs.Text){
+        try{Configs.Text[key] = ui[key].text()}catch(e){log(e)}
+    }
+    for(let key in Configs.checked){
+        try{Configs.checked[key] = ui[key].checked}catch(e){log(e)}
+    }
+    log(cfgs.ui)
+    files.write('data/cfgs.json',JSON.stringify(cfgs))
+}
+
+function loadConfig(){
+    let Configs = cfgs.ui
+    for(let key in Configs.Text){
+        try{ui[key].setText(Configs.Text[key])}catch(e){log(e)}
+    }
+    for(let key in Configs.checked){
+        try{ui[key].checked=(Configs.checked[key])}catch(e){log(e)}
+    }
+    
 }
 sleep(5000)
 func.log("任务结束")

@@ -1,6 +1,6 @@
 <vertical gravity="center" id="tab1Content">
     <card w="*" h="40" margin="32 8" cardCornerRadius="8dp" cardElevation="3dp">
-        <text id="start" text="开始运行" gravity="center" textSize="18sp" />
+        <text id="start" text="保存配置" gravity="center" textSize="18sp" />
     </card>
     <card w="*" h="auto" margin="16 4" cardCornerRadius="8dp" cardElevation="1dp" gravity="center_vertical">
     <vertical id="config" gravity="center" padding="8 8 8 0" h="auto">
@@ -34,8 +34,9 @@
         </vertical>
     </card>
     <card w="*" h="40" margin="32 8" cardCornerRadius="8dp" cardElevation="3dp">
-        <text id="view_db" text="导出数据" gravity="center" textSize="18sp" />
+        <text id="view_db" text="查看数据" gravity="center" textSize="18sp" />
     </card>
+    <text id="save_to" text="数据文件保存路径：" gravity="center" textSize="12dpp" />
     <card w="*" h="auto" margin="16 32" cardCornerRadius="8dp" cardElevation="1dp" gravity="center_vertical">
         <vertical id="config" gravity="center" padding="8 8 8 0" h="auto">
                 <vertical padding="4 8" h="auto">

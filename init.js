@@ -29,7 +29,7 @@ function create_mainFrame(){
     ui.layout(
         files.read("mainFrame.xml")
     )
-    ui.toolbar.setTitle(init.ProjectConfig.name)
+    ui.toolbar.setTitle(cfgs.project.name+'  '+cfgs.project.version)
     createViews()
     binds()
     loadConfig()
@@ -54,14 +54,9 @@ function binds(){
     ui.chatQQ.on("click",()=>{_func.chatQQ("1148339518")})
     ui.start.on("click",start)
     ui.view_db.on("click",()=>{
-        files.copy('./data/data.db', '/sdcard/data.db')
-        toastLog('数据库文件已导出至手机根目录')
-        app.startActivity({
-            action: "android.intent.action.GET_CONTENT",
-            // type:'*/*',
-            category:['android.intent.category.OPENABLE'],
-            data: app.getUriForFile('/sdcard/data.db')
-        });
+        // files.copy('./data/user_data.txt', '/sdcard/user_data.txt')
+        // toastLog('数据文件已导出至手机根目录')
+        app.viewFile('/sdcard/user_data.txt')
     })
     // ui.设置话术.on("click",function(){app.editFile(ui.话术路径.text())})
     // ui.选择文件.on("click",Choose.choose)
@@ -74,21 +69,26 @@ function binds(){
     ui.emitter.on("options_item_selected", (e, item)=>{
         switch(item.getTitle()){
             case "强制更新":
+                let url = cfg.project.url
+                if(!url){toastLog('资源加载失败');break}
+                let project_info = cfg.project
                 {
-                        project_info = {url:"https://gitee.com/cytsee/AutoJsPro/raw/master-release/Release/%E5%BE%AE%E4%BF%A1%E5%8A%A9%E6%89%8BX.zip",
-                            project_name:"微信工具人"
-                        }
-                        if(!project_info){
-                            toastLog('资源加载失败')
-                            return
-                        }
-                        var url  = project_info.url
-                        var project_name = project_info.project_name
-                        let last = $crypto.digest(files.read('./main.js'), "MD5")
-                        let now = ''
+                        var project_name = project_info.name
+                        let last = $crypto.digest(files.read('./data/cfgs.json'), "MD5")//由于版本号存储在cfgs中
+                        let is_new = false
                         var thread = threads.start(function(){
                             files.writeBytes("./source.zip",http.get(url).body.bytes())
-                            $zip.unzip('./source.zip', './');
+                            $zip.unzip('./source.zip', './data/temp');
+                            if(!files.exists('./data/temp/data/cfgs.json')){
+                                toastLog('cfgs.json资源文件缺失')
+                            }else{
+                                if(last == $crypto.digest(files.read('./data/temp/data/cfgs.json'), "MD5")){
+                                    toastLog('没有新版本可用')
+                                }else{
+                                    is_new = true
+                                    $zip.unzip('./source.zip', './');
+                                }
+                            }
                         })
                         dialog = dialogs.build({
                             title: "正在加载项目 "+project_name,
@@ -108,18 +108,15 @@ function binds(){
                                  clearInterval(dialogInterval);
                                  dialog.dismiss();
                                  dialog = null;
-                                 toast(project_name+" 加载成功");
+                                 
                              }else{
                                 dialog.setProgress(99);
                              }
                          }, 10)
                         thread.join()
                         // engines.myEngine().forceStop()
-                        if (last == $crypto.digest(files.read('./main.js'), "MD5")){
-                            toastLog('资源文件缺失')
-                        }else{
-                            Configs.project_info = project_info
-                            storage.put("Configs",Configs)
+                        if(is_new){
+                            toast(project_name+" 加载成功");
                             engines.execScriptFile('main.js'); 
                         }
                         return
