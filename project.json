@@ -1,0 +1,34 @@
+{
+  "assets": [],
+  "build": {
+    "build_id": "5DF8260F-1",
+    "build_number": 1,
+    "build_time": 1635842073338,
+    "release": false
+  },
+  "encryptLevel": 3,
+  "useFeatures": [],
+  "icon": "res/icon.png",
+  "launchConfig": {
+    "displaySplash": false,
+    "hideLogs": false,
+    "splashText": "Powered by X",
+    "stableMode": false
+  },
+  "main": "main.js",
+  "name": "微信工具人",
+  "optimization": {
+    "removeAccessibilityService": false,
+    "removeOpenCv": false,
+    "unusedResources": false
+  },
+  "packageName": "com.nb.weixin.X",
+  "permissionConfig": {
+    "requestListOnStartup": [
+      "android.permission.WRITE_EXTERNAL_STORAGE"
+    ]
+  },
+  "scripts": {},
+  "versionCode": 2,
+  "versionName": "Beta 0.0.2"
+}

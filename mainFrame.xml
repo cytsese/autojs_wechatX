@@ -1,0 +1,45 @@
+<drawer  id="drawer">
+    <frame >
+       <tabs bg="#111111" layout_gravity="bottom" h="40" id="tabs"/>
+    </frame>
+        <vertical>
+            <appbar bg="#111111" >
+                <toolbar h="50" gravity="center" id="toolbar"/>
+            </appbar>
+            <viewpager id="viewpager" >
+                <frame>
+                    <ScrollView margin="0 0 0 40">
+                        <vertical padding="8 8" id="tab1" >                    
+                            <horizontal padding="8">
+                                <Switch id="acces" text="无障碍" layout_weight="1" checked="{{auto.service != null}}" padding="8 8 8 8" />
+                                <Switch id="window" text="悬浮窗" layout_weight="1" checked="{{auto.service != null}}" padding="8 8 8 8" />
+                                <Switch id="capture" text="截图" layout_weight="1" checked="false" padding="8 8 8 8" />
+                            </horizontal>
+                        </vertical>
+                    </ScrollView>
+               </frame>
+               <frame>
+                    <vertical id="config" gravity="center" padding="8 8 8 0" h="auto">
+                        <text textSize="22dp"  margin="16 16" gravity="center" text="欢迎赞助"/>
+                        <img id="rounded_img" src="https://gitee.com/cytsee/AutoJsPro/raw/master/%E8%B5%9E%E5%8A%A9.jpg" w="250" h="400" radius="10dp" scaleType="fitXY"/>
+                    </vertical>
+               </frame>
+            </viewpager>
+        </vertical>
+        <frame layout_gravity="left" w="{{(device.width)*0.75}}px">
+            <vertical scaleType="fitXY" >
+                <frame gravity="center" h="100" bg="#00000000">
+
+                </frame>
+                <list id="menu">
+                    <horizontal init.bg="?selectableItemBackground" w="*">
+                        <img w="50" h="50" padding="16" src="{{this.icon}}" tint="#FFFFFF"/>
+                        <text  textColor="white" text="{{this.title}}" layout_gravity="center"/>
+                    </horizontal>
+                </list>
+            </vertical>
+            <linear id="chatQQ" gravity="bottom">
+                    <text h="40" w="*" gravity="center" text="»点此联系作者«"/>
+            </linear>
+        </frame>
+</drawer>
