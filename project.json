@@ -1,9 +1,9 @@
 {
   "assets": [],
   "build": {
-    "build_id": "5DF8260F-1",
-    "build_number": 1,
-    "build_time": 1635842073338,
+    "build_id": "A5A2727D-2",
+    "build_number": 2,
+    "build_time": 1635868113100,
     "release": false
   },
   "encryptLevel": 3,
@@ -29,6 +29,6 @@
     ]
   },
   "scripts": {},
-  "versionCode": 2,
-  "versionName": "Beta 0.0.2"
+  "versionCode": 100,
+  "versionName": "Release 1.0.0"
 }
