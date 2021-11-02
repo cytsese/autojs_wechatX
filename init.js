@@ -69,9 +69,9 @@ function binds(){
     ui.emitter.on("options_item_selected", (e, item)=>{
         switch(item.getTitle()){
             case "强制更新":
-                let url = cfg.project.url
+                let url = cfgs.project.url
                 if(!url){toastLog('资源加载失败');break}
-                let project_info = cfg.project
+                let project_info = cfgs.project
                 {
                         var project_name = project_info.name
                         let last = $crypto.digest(files.read('./data/cfgs.json'), "MD5")//由于版本号存储在cfgs中
